@@ -184,11 +184,23 @@ def test_make_policy_examples_use_valid_arena_mission(tmp_path) -> None:
     )
 
     assert amongthem.exit_code == 0, amongthem.output
-    assert "Policy file only:" in amongthem.stdout
-    assert "amongthem_policy.py" in amongthem.stdout
-    assert "Docker/Coworld submission guide: https://softmax.com/play_amongthem.md" in amongthem.stdout
+    normalized_amongthem = _normalize_cli_text(amongthem.stdout)
+    assert "Edit starter policy:" in normalized_amongthem
+    assert "amongthem_policy.py" in normalized_amongthem
+    assert "Start with: AmongThemPolicy._choose_actions()" in normalized_amongthem
+    assert "Preview template: cogames tutorial make-policy --amongthem --print" in normalized_amongthem
+    assert "Docker/Coworld submission guide: https://softmax.com/play_amongthem.md" in normalized_amongthem
     assert "cogames upload" not in amongthem.stdout
     assert "cogames ship" not in amongthem.stdout
+
+
+def test_make_policy_can_print_template_source() -> None:
+    result = runner.invoke(main_module.app, ["tutorial", "make-policy", "--amongthem", "--print"])
+
+    assert result.exit_code == 0, result.output
+    assert "class AmongThemPolicy(MultiAgentPolicy):" in result.stdout
+    assert "def _choose_actions(self, raw_observations: np.ndarray) -> np.ndarray:" in result.stdout
+    assert "policy template copied" not in result.stdout
 
 
 def test_make_policy_rejects_unimportable_output_stem(tmp_path) -> None:

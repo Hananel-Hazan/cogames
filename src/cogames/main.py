@@ -14,7 +14,6 @@ import importlib.resources
 import keyword
 import logging
 import os
-import shutil
 import sys
 import webbrowser
 from pathlib import Path
@@ -628,7 +627,9 @@ def replay_cmd(
 [cyan]cogames tutorial make-policy --scripted -o my_scripted_policy.py[/cyan]  Scripted (rule-based)
 
 [cyan]cogames tutorial make-policy --amongthem -o amongthem_policy.py[/cyan]
-                                                                  AmongThem scripted practice""",
+                                                                  AmongThem scripted practice
+
+[cyan]cogames tutorial make-policy --amongthem --print[/cyan]     Preview template source""",
     add_help_option=False,
 )
 def make_policy(
@@ -658,6 +659,12 @@ def make_policy(
         "-o",
         metavar="FILE",
         help="Output file path.",
+        rich_help_panel="Output",
+    ),
+    print_template: bool = typer.Option(
+        False,
+        "--print",
+        help="Print the policy template instead of writing a file.",
         rich_help_panel="Output",
     ),
     # --- Help ---
@@ -705,27 +712,33 @@ def make_policy(
             console.print(f"[red]Error: {policy_type} policy template not found[/red]")
             raise typer.Exit(1)
 
+        template_text = template_path.read_text()
+        if not trainable:
+            lines = template_text.splitlines()
+            lines = [line for line in lines if not line.strip().startswith("short_names =")]
+            template_text = "\n".join(lines) + "\n"
+
+        if print_template:
+            sys.stdout.write(template_text)
+            return
+
         dest_path = Path.cwd() / output
         _validate_policy_module_name_or_exit(dest_path)
 
         if dest_path.exists():
             console.print(f"[yellow]Warning: {dest_path} already exists. Overwriting...[/yellow]")
 
-        shutil.copy2(template_path, dest_path)
+        dest_path.write_text(template_text)
         console.print(f"[green]{policy_type} policy template copied to: {dest_path}[/green]")
-
-        if not trainable:
-            content = dest_path.read_text()
-            lines = content.splitlines()
-            lines = [line for line in lines if not line.strip().startswith("short_names =")]
-            dest_path.write_text("\n".join(lines) + "\n")
 
         if trainable:
             console.print(
                 f"[dim]Train with: cogames tutorial train -m arena -p class={dest_path.stem}.{policy_class}[/dim]"
             )
         elif amongthem:
-            console.print(f"[dim]Policy file only: {output}[/dim]", soft_wrap=True)
+            console.print(f"[dim]Edit starter policy: {dest_path}[/dim]", soft_wrap=True)
+            console.print("[dim]Start with: AmongThemPolicy._choose_actions()[/dim]")
+            console.print("[dim]Preview template: cogames tutorial make-policy --amongthem --print[/dim]")
             console.print("[dim]Wrap it in a Docker player before submitting to Among Them Daily.[/dim]")
             console.print("[dim]Docker/Coworld submission guide: https://softmax.com/play_amongthem.md[/dim]")
         else:

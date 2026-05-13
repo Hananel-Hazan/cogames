@@ -21,10 +21,14 @@ https://softmax.com/play_amongthem.md
 ## 1. Create an editable policy
 
 ```bash
+# Preview the exact starter policy source.
+cogames tutorial make-policy --amongthem --print
+
+# Write an editable copy.
 cogames tutorial make-policy --amongthem -o amongthem_policy.py
 ```
 
-Edit `AmongThemPolicy._choose_actions()` in the generated file. The template receives raw BitWorld observations and
+Open `amongthem_policy.py` and start with `AmongThemPolicy._choose_actions()`. The template receives raw BitWorld observations and
 must return an `np.ndarray` of integer action indices from the BitWorld trainable action set; the parent
 `step_batch()` writes those into `raw_actions`.
 
