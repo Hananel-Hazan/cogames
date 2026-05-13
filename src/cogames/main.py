@@ -725,17 +725,9 @@ def make_policy(
                 f"[dim]Train with: cogames tutorial train -m arena -p class={dest_path.stem}.{policy_class}[/dim]"
             )
         elif amongthem:
-            policy_spec = f"class={dest_path.stem}.{policy_class}"
-            console.print(
-                f"[dim]Dry-run validation: cogames upload -p {policy_spec} -f {output} "
-                "-n $USER-amongthem-practice --season <season> --dry-run[/dim]"
-            )
-            console.print(
-                f"[dim]Ship: cogames ship -p {policy_spec} -f {output} "
-                "-n $USER-amongthem-practice --season <season>[/dim]"
-            )
-            console.print("[dim]Score: cogames leaderboard <season> --policy $USER-amongthem-practice[/dim]")
-            console.print("[dim]Walkthrough: cogames docs amongthem_policy[/dim]")
+            console.print(f"[dim]Policy file only: {output}[/dim]", soft_wrap=True)
+            console.print("[dim]Wrap it in a Docker player before submitting to Among Them Daily.[/dim]")
+            console.print("[dim]Docker/Coworld submission guide: https://softmax.com/play_amongthem.md[/dim]")
         else:
             console.print(f"[dim]Play with: cogames play -m arena -p class={dest_path.stem}.{policy_class}[/dim]")
 

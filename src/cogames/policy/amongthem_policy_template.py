@@ -3,7 +3,9 @@
 Generate a copy with:
     cogames tutorial make-policy --amongthem -o amongthem_policy.py
 
-Then edit AmongThemPolicy._choose_actions() and ship the copied file.
+Then edit AmongThemPolicy._choose_actions(). This file is only a policy starting point;
+public Among Them submissions need a Docker player wrapper that follows the Coworld
+flow in https://softmax.com/play_amongthem.md.
 """
 
 from __future__ import annotations
