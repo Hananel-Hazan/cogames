@@ -287,7 +287,7 @@ def leaderboard_cmd(
         raise typer.Exit(1)
     effective_season = season_arg or season
 
-    token = load_current_cogames_token(login_server=get_login_server())
+    token = load_current_cogames_token(login_server=get_login_server(api_server=server))
     with TournamentServerClient(server_url=server, token=token) as client:
         resolved_season = effective_season or client.get_default_season().name
         with cli_http_errors(f"Season '{resolved_season}'"):

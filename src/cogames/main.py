@@ -1476,7 +1476,7 @@ def diagnose_cmd(ctx: typer.Context) -> None:
 
 
 def _resolve_season(server: str, season_name: str | None = None) -> SeasonDetail:
-    auth_token = load_current_cogames_token(login_server=get_login_server())
+    auth_token = load_current_cogames_token(login_server=get_login_server(api_server=server))
     try:
         with TournamentServerClient(server_url=server, token=auth_token) as client:
             if season_name is None:
@@ -1647,7 +1647,7 @@ def validate_bundle_cmd(
     if image == DEFAULT_EPISODE_RUNNER_IMAGE and season_info.compat_version is not None:
         image = f"ghcr.io/metta-ai/episode-runner:compat-v{season_info.compat_version}"
 
-    auth_token = load_current_cogames_token(login_server=get_login_server())
+    auth_token = load_current_cogames_token(login_server=get_login_server(api_server=server))
     season_ref = season or season_info.name
     with TournamentServerClient(server_url=server, token=auth_token) as client:
         pool_config = _resolve_validation_pool_config(client, season_ref, season_info)

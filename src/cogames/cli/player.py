@@ -23,8 +23,8 @@ player_app = typer.Typer(
 )
 
 
-def _load_user_token_or_exit() -> str:
-    user_token = load_cogames_user_token(login_server=get_login_server())
+def _load_user_token_or_exit(api_server: str | None = None) -> str:
+    user_token = load_cogames_user_token(login_server=get_login_server(api_server=api_server))
     if user_token is None:
         console.print("[red]No saved user session found.[/red] Run [cyan]cogames auth login[/cyan] first.")
         raise typer.Exit(1)
@@ -61,7 +61,7 @@ def list_players_cmd(
     json: bool = typer.Option(False, "--json", help="Emit machine-readable JSON."),
 ) -> None:
     """List the players owned by the saved user session."""
-    user_token = _load_user_token_or_exit()
+    user_token = _load_user_token_or_exit(api_server=server)
     with cli_http_errors("players"):
         with TournamentServerClient(server_url=server, token=user_token) as client:
             players = client.list_players()
@@ -96,13 +96,13 @@ def login_player_cmd(
     json: bool = typer.Option(False, "--json", help="Emit machine-readable JSON."),
 ) -> None:
     """Mint a short-lived player session token and make it the active CoGames session."""
-    user_token = _load_user_token_or_exit()
+    user_token = _load_user_token_or_exit(api_server=server)
     with cli_http_errors("player"):
         with TournamentServerClient(server_url=server, token=user_token) as client:
             player_id = _resolve_player(client, player)
             response = client.login_player(player_id)
 
-    save_cogames_active_token(login_server=get_login_server(), token=response.token)
+    save_cogames_active_token(login_server=get_login_server(api_server=server), token=response.token)
 
     if json:
         emit_json(response.model_dump(mode="json"))
@@ -126,7 +126,7 @@ def logout_player_cmd(
     ),
 ) -> None:
     """Restore the saved user session as the active CoGames session."""
-    user_token = restore_cogames_user_session(login_server=get_login_server())
+    user_token = restore_cogames_user_session(login_server=get_login_server(api_server=server))
     if user_token is None:
         console.print("[red]No saved user session found.[/red] Run [cyan]cogames auth login[/cyan] first.")
         raise typer.Exit(1)
@@ -153,7 +153,7 @@ def create_player_cmd(
     json: bool = typer.Option(False, "--json", help="Emit machine-readable JSON."),
 ) -> None:
     """Create a new player."""
-    user_token = _load_user_token_or_exit()
+    user_token = _load_user_token_or_exit(api_server=server)
     with cli_http_errors("player"):
         with TournamentServerClient(server_url=server, token=user_token) as client:
             player = client.create_player(name)
@@ -190,7 +190,7 @@ def list_credentials_cmd(
     json: bool = typer.Option(False, "--json", help="Emit machine-readable JSON."),
 ) -> None:
     """List credentials for a player."""
-    user_token = _load_user_token_or_exit()
+    user_token = _load_user_token_or_exit(api_server=server)
     with cli_http_errors("credentials"):
         with TournamentServerClient(server_url=server, token=user_token) as client:
             player_id = _resolve_player(client, player)
@@ -236,7 +236,7 @@ def create_credential_cmd(
     json: bool = typer.Option(False, "--json", help="Emit machine-readable JSON."),
 ) -> None:
     """Create an API credential for a player. The token is shown only once."""
-    user_token = _load_user_token_or_exit()
+    user_token = _load_user_token_or_exit(api_server=server)
     with cli_http_errors("credential"):
         with TournamentServerClient(server_url=server, token=user_token) as client:
             player_id = _resolve_player(client, player)
@@ -265,7 +265,7 @@ def revoke_credential_cmd(
     ),
 ) -> None:
     """Revoke a player credential."""
-    user_token = _load_user_token_or_exit()
+    user_token = _load_user_token_or_exit(api_server=server)
     with cli_http_errors("credential"):
         with TournamentServerClient(server_url=server, token=user_token) as client:
             player_id = _resolve_player(client, player)

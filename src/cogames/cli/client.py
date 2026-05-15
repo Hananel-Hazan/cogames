@@ -63,7 +63,7 @@ class TournamentServerClient:
 
     @classmethod
     def from_login(cls, server_url: str) -> TournamentServerClient | None:
-        token = load_current_cogames_token(login_server=get_login_server())
+        token = load_current_cogames_token(login_server=get_login_server(api_server=server_url))
         if token is None:
             console.print("[red]Error:[/red] Not authenticated.")
             console.print("Please run: [cyan]cogames auth login[/cyan]")

@@ -130,7 +130,7 @@ def test_leaderboard_mine_uses_season_policies_for_filtering(monkeypatch: pytest
     client_factory = _LeaderboardClientFactory(public_client=public_client, auth_client=auth_client)
     monkeypatch.setattr(leaderboard, "TournamentServerClient", client_factory)
     monkeypatch.setattr(leaderboard, "load_current_cogames_token", lambda login_server: "test-token")
-    monkeypatch.setattr(leaderboard, "get_login_server", lambda: "https://login.example")
+    monkeypatch.setattr(leaderboard, "get_login_server", lambda api_server=None: "https://login.example")
 
     leaderboard.leaderboard_cmd(
         season_arg="test-season",
@@ -155,7 +155,7 @@ def test_leaderboard_uses_login_token_without_mine_filter(monkeypatch: pytest.Mo
 
     monkeypatch.setattr(leaderboard, "TournamentServerClient", client_factory)
     monkeypatch.setattr(leaderboard, "load_current_cogames_token", lambda login_server: "test-token")
-    monkeypatch.setattr(leaderboard, "get_login_server", lambda: "https://login.example")
+    monkeypatch.setattr(leaderboard, "get_login_server", lambda api_server=None: "https://login.example")
 
     leaderboard.leaderboard_cmd(
         season_arg="private-season",

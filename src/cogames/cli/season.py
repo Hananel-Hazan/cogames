@@ -32,7 +32,7 @@ LEADERBOARD_TYPE_OPTION = typer.Option(
 def _get_client(server: str) -> TournamentServerClient:
     return TournamentServerClient(
         server_url=server,
-        token=load_current_cogames_token(login_server=get_login_server()),
+        token=load_current_cogames_token(login_server=get_login_server(api_server=server)),
     )
 
 
