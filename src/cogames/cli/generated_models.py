@@ -290,7 +290,6 @@ class FreeplayDetails(CLIModel):
 
 class GamePublic(CLIModel):
     name: Annotated[str, Field(title="Name")]
-    slug: Annotated[str, Field(title="Slug")]
     coworld_name: Annotated[Optional[str], Field(title="Coworld Name")] = None
     description: Annotated[Optional[str], Field(title="Description")] = None
     owner_user_id: Annotated[str, Field(title="Owner User Id")]
@@ -517,7 +516,6 @@ class MissionSpec(CLIModel):
 
 class ModPublic(CLIModel):
     name: Annotated[str, Field(title="Name")]
-    slug: Annotated[str, Field(title="Slug")]
     description: Annotated[Optional[str], Field(title="Description")] = None
     owner_user_id: Annotated[str, Field(title="Owner User Id")]
     notes: Annotated[Optional[str], Field(title="Notes")] = None
@@ -1580,7 +1578,6 @@ class LeaderboardRecentRoundPublic(CLIModel):
 
 class LeaguePublic(CLIModel):
     name: Annotated[str, Field(title="Name")]
-    slug: Annotated[str, Field(title="Slug")]
     description: Annotated[Optional[str], Field(title="Description")] = None
     commissioner_key: Annotated[str, Field(title="Commissioner Key")]
     commissioner_config: Annotated[Optional[dict[str, Any]], Field(title="Commissioner Config")] = None
