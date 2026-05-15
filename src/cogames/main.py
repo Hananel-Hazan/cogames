@@ -136,8 +136,9 @@ def _read_doc_text(doc_name: str) -> str:
     return _read_packaged_doc(doc_name)
 
 
-def _register_policies() -> None:
-    if len(sys.argv) <= 1 or sys.argv[1] in _POLICY_FREE_COMMANDS:
+def _register_policies(ctx: typer.Context) -> None:
+    invoked_subcommand = ctx.invoked_subcommand
+    if invoked_subcommand is None or invoked_subcommand in _POLICY_FREE_COMMANDS:
         return
 
     from mettagrid.policy.loader import discover_and_register_policies  # noqa: PLC0415

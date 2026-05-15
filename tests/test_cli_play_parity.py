@@ -219,7 +219,8 @@ def test_amongthem_policy_walkthrough_is_packaged() -> None:
     result = runner.invoke(main_module.app, ["docs", "amongthem_policy"])
 
     assert result.exit_code == 0, result.output
-    assert "AmongThem Policy Practice" in result.stdout
+    assert "Among Them Starter Policy" in result.stdout
+    assert "coworld make-policy among_them -o amongthemstarter" in result.stdout
     assert "cogames tutorial make-policy --amongthem" in result.stdout
     assert "https://softmax.com/play_amongthem.md" in result.stdout
     assert "cogames upload" not in result.stdout
