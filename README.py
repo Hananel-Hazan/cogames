@@ -212,7 +212,7 @@
 # Use separate subcommands (`stages`, `progress`, `teams`, `leaderboard`) for details.
 #
 # ## API Docs
-# The tournament API is documented at [api.observatory.softmax-research.net/docs](https://api.observatory.softmax-research.net/docs). The interactive
+# The tournament API is documented at [softmax.com/api/observatory/docs](https://softmax.com/api/observatory/docs). The interactive
 # OpenAPI spec describes all public endpoints for seasons, matches, leaderboards, and submissions.
 #
 # ## Intended submit workflow (CLI)

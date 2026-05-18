@@ -57,11 +57,11 @@ def _invoke_cogames(args: list[str], home: Path, env: dict[str, str] | None = No
 
 
 @pytest.fixture
-def fake_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+def fake_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, httpserver: HTTPServer) -> Path:
     """Create a fake HOME directory with a pre-configured auth token."""
     monkeypatch.setenv("HOME", str(tmp_path))
 
-    save_token(token_kind=TokenKind.COGAMES, token="test-token-12345", server="https://softmax.com/api")
+    save_token(token_kind=TokenKind.COGAMES, token="test-token-12345", server=httpserver.url_for(""))
 
     return tmp_path
 
@@ -113,7 +113,7 @@ def test_upload_command_sends_correct_requests(
     assert "season" not in complete_body
 
     submit_req, _ = httpserver.log[6]
-    assert submit_req.path == "/tournament/seasons/test-season/submissions"
+    assert submit_req.path == "/observatory/tournament/seasons/test-season/submissions"
     assert submit_req.json == {"policy_version_id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"}
 
 
@@ -202,7 +202,7 @@ def test_upload_no_submit_skips_season_lookup(
 ) -> None:
     """Test that --no-submit does not require any season lookup when validation is skipped."""
     httpserver.expect_request(
-        "/stats/policies/submit/presigned-url",
+        "/observatory/stats/policies/submit/presigned-url",
         method="POST",
     ).respond_with_json(
         {
@@ -216,7 +216,7 @@ def test_upload_no_submit_skips_season_lookup(
         method="PUT",
     ).respond_with_data("")
     httpserver.expect_request(
-        "/stats/policies/submit/complete",
+        "/observatory/stats/policies/submit/complete",
         method="POST",
     ).respond_with_json(
         {
@@ -248,10 +248,10 @@ def test_upload_no_submit_skips_season_lookup(
 
     assert result.exit_code == 0, f"Upload failed:\n{result.output}"
 
-    season_requests = [req for req, _ in httpserver.log if req.path == "/tournament/seasons"]
+    season_requests = [req for req, _ in httpserver.log if req.path == "/observatory/tournament/seasons"]
     assert not season_requests
 
-    complete_req = next(req for req, _ in httpserver.log if req.path == "/stats/policies/submit/complete")
+    complete_req = next(req for req, _ in httpserver.log if req.path == "/observatory/stats/policies/submit/complete")
     assert "season" not in complete_req.json
     assert "Upload complete: test-policy:v1" in result.output
 
@@ -279,11 +279,11 @@ def test_upload_command_fails_without_auth(
     }
 
     httpserver.expect_request(
-        "/tournament/seasons",
+        "/observatory/tournament/seasons",
         method="GET",
     ).respond_with_json([season_summary])
     httpserver.expect_request(
-        "/tournament/seasons/test-season",
+        "/observatory/tournament/seasons/test-season",
         method="GET",
     ).respond_with_json(_season_info_from_summary(season_summary))
 
@@ -310,7 +310,7 @@ def _setup_mock_upload_server(
     upload_id: str = _UPLOAD_ID,
 ) -> None:
     """Configure httpserver with the endpoints needed for upload."""
-    httpserver.expect_request("/whoami", method="GET").respond_with_json(
+    httpserver.expect_request("/observatory/whoami", method="GET").respond_with_json(
         {"user_email": "test@example.com", "subject_type": "user"}
     )
 
@@ -332,16 +332,16 @@ def _setup_mock_upload_server(
     }
 
     httpserver.expect_request(
-        "/tournament/seasons",
+        "/observatory/tournament/seasons",
         method="GET",
     ).respond_with_json([season_summary])
     httpserver.expect_request(
-        "/tournament/seasons/test-season",
+        "/observatory/tournament/seasons/test-season",
         method="GET",
     ).respond_with_json(_season_info_from_summary(season_summary))
 
     httpserver.expect_request(
-        "/stats/policies/submit/presigned-url",
+        "/observatory/stats/policies/submit/presigned-url",
         method="POST",
     ).respond_with_json(
         {
@@ -370,11 +370,11 @@ def _setup_mock_upload_server(
         )
 
     httpserver.expect_request(
-        "/stats/policies/submit/complete",
+        "/observatory/stats/policies/submit/complete",
         method="POST",
     ).respond_with_handler(handle_complete)
     httpserver.expect_request(
-        "/tournament/seasons/test-season/submissions",
+        "/observatory/tournament/seasons/test-season/submissions",
         method="POST",
     ).respond_with_json({"pools": ["competition"]})
 
@@ -867,21 +867,21 @@ def _setup_mock_upload_server_with_season(
 ) -> None:
     season_summary = seasons[0]
 
-    httpserver.expect_request("/whoami", method="GET").respond_with_json(
+    httpserver.expect_request("/observatory/whoami", method="GET").respond_with_json(
         {"user_email": "test@example.com", "subject_type": "user"}
     )
 
     httpserver.expect_request(
-        "/tournament/seasons",
+        "/observatory/tournament/seasons",
         method="GET",
     ).respond_with_json(seasons)
     httpserver.expect_request(
-        f"/tournament/seasons/{season_summary['name']}",
+        f"/observatory/tournament/seasons/{season_summary['name']}",
         method="GET",
     ).respond_with_json(_season_info_from_summary(season_summary))
 
     httpserver.expect_request(
-        "/stats/policies/submit/presigned-url",
+        "/observatory/stats/policies/submit/presigned-url",
         method="POST",
     ).respond_with_json(
         {
@@ -910,11 +910,11 @@ def _setup_mock_upload_server_with_season(
         )
 
     httpserver.expect_request(
-        "/stats/policies/submit/complete",
+        "/observatory/stats/policies/submit/complete",
         method="POST",
     ).respond_with_handler(handle_complete)
     httpserver.expect_request(
-        f"/tournament/seasons/{season_summary['name']}/submissions",
+        f"/observatory/tournament/seasons/{season_summary['name']}/submissions",
         method="POST",
     ).respond_with_json({"pools": ["qualifying"]})
 
@@ -1050,7 +1050,7 @@ def test_validate_policy_fetches_config_and_runs(
     default_cfg = MettaGridConfig()
 
     httpserver.expect_request(
-        "/tournament/seasons/test-season",
+        "/observatory/tournament/seasons/test-season",
         method="GET",
     ).respond_with_json(
         {
@@ -1079,7 +1079,7 @@ def test_validate_policy_fetches_config_and_runs(
     )
 
     httpserver.expect_request(
-        "/tournament/seasons/test-season/pools/qualifying/config",
+        "/observatory/tournament/seasons/test-season/pools/qualifying/config",
         method="GET",
     ).respond_with_json(
         {"pool_name": "qualifying", "game_engine": "mettagrid", "config": default_cfg.model_dump(mode="json")}
@@ -1131,7 +1131,7 @@ def test_validate_policy_uses_requested_season_ref_for_pool_config(httpserver: H
     default_cfg = MettaGridConfig()
 
     httpserver.expect_request(
-        "/tournament/seasons/test-season:v2",
+        "/observatory/tournament/seasons/test-season:v2",
         method="GET",
     ).respond_with_json(
         {
@@ -1159,7 +1159,7 @@ def test_validate_policy_uses_requested_season_ref_for_pool_config(httpserver: H
     )
 
     httpserver.expect_request(
-        "/tournament/seasons/test-season:v2/pools/qualifying/config",
+        "/observatory/tournament/seasons/test-season:v2/pools/qualifying/config",
         method="GET",
     ).respond_with_json(
         {"pool_name": "qualifying", "game_engine": "mettagrid", "config": default_cfg.model_dump(mode="json")}
@@ -1190,7 +1190,7 @@ def test_validate_policy_uses_pool_config_game_engine(httpserver: HTTPServer) ->
     default_cfg = MettaGridConfig()
 
     httpserver.expect_request(
-        "/tournament/seasons/test-season",
+        "/observatory/tournament/seasons/test-season",
         method="GET",
     ).respond_with_json(
         {
@@ -1219,7 +1219,7 @@ def test_validate_policy_uses_pool_config_game_engine(httpserver: HTTPServer) ->
     )
 
     httpserver.expect_request(
-        "/tournament/seasons/test-season/pools/qualifying/config",
+        "/observatory/tournament/seasons/test-season/pools/qualifying/config",
         method="GET",
     ).respond_with_json(
         {"pool_name": "qualifying", "game_engine": "bitworld", "config": default_cfg.model_dump(mode="json")}
@@ -1316,7 +1316,7 @@ def test_validate_policy_falls_back_to_non_entry_pool_config(httpserver: HTTPSer
     default_cfg = MettaGridConfig()
 
     httpserver.expect_request(
-        "/tournament/seasons/test-season",
+        "/observatory/tournament/seasons/test-season",
         method="GET",
     ).respond_with_json(
         {
@@ -1346,12 +1346,12 @@ def test_validate_policy_falls_back_to_non_entry_pool_config(httpserver: HTTPSer
     )
 
     httpserver.expect_request(
-        "/tournament/seasons/test-season/pools/entry/config",
+        "/observatory/tournament/seasons/test-season/pools/entry/config",
         method="GET",
     ).respond_with_json({"detail": "Pool config not found"}, status=404)
 
     httpserver.expect_request(
-        "/tournament/seasons/test-season/pools/stage-1/config",
+        "/observatory/tournament/seasons/test-season/pools/stage-1/config",
         method="GET",
     ).respond_with_json(
         {"pool_name": "stage-1", "game_engine": "mettagrid", "config": default_cfg.model_dump(mode="json")}
@@ -1457,15 +1457,15 @@ def test_upload_rejects_oversized_at_completion(
         "pools": [],
     }
 
-    httpserver.expect_request("/tournament/seasons", method="GET").respond_with_json([season_summary])
-    httpserver.expect_request("/tournament/seasons/test-season", method="GET").respond_with_json(
+    httpserver.expect_request("/observatory/tournament/seasons", method="GET").respond_with_json([season_summary])
+    httpserver.expect_request("/observatory/tournament/seasons/test-season", method="GET").respond_with_json(
         _season_info_from_summary(season_summary)
     )
-    httpserver.expect_request("/stats/policies/submit/presigned-url", method="POST").respond_with_json(
+    httpserver.expect_request("/observatory/stats/policies/submit/presigned-url", method="POST").respond_with_json(
         {"upload_url": httpserver.url_for("/fake-s3-upload"), "s3_key": "test/policy.zip", "upload_id": _UPLOAD_ID}
     )
     httpserver.expect_request("/fake-s3-upload", method="PUT").respond_with_data("")
-    httpserver.expect_request("/stats/policies/submit/complete", method="POST").respond_with_json(
+    httpserver.expect_request("/observatory/stats/policies/submit/complete", method="POST").respond_with_json(
         {"detail": "Policy too large: 600 MB (max 500 MB)"},
         status=413,
     )

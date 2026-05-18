@@ -37,7 +37,7 @@ from cogames.cli.generated_models import (
     TeamSummary,
     TeamTournamentProgress,
 )
-from softmax.auth import fetch_cogames_whoami, get_login_server, load_current_cogames_token
+from softmax.auth import fetch_cogames_whoami, load_current_cogames_token
 
 T = TypeVar("T")
 
@@ -50,7 +50,7 @@ class TournamentServerClient:
     ):
         self._server_url = server_url
         self._token = token
-        self._http_client = httpx.Client(base_url=server_url, timeout=30.0)
+        self._http_client = httpx.Client(base_url=f"{server_url.rstrip('/')}/observatory", timeout=30.0)
 
     def __enter__(self):
         return self
@@ -63,7 +63,7 @@ class TournamentServerClient:
 
     @classmethod
     def from_login(cls, server_url: str) -> TournamentServerClient | None:
-        token = load_current_cogames_token(login_server=get_login_server(api_server=server_url))
+        token = load_current_cogames_token(api_server=server_url)
         if token is None:
             console.print("[red]Error:[/red] Not authenticated.")
             console.print("Please run: [cyan]cogames auth login[/cyan]")

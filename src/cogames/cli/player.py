@@ -7,9 +7,9 @@ from rich.table import Table
 from cogames.cli.base import cli_http_errors, console, emit_json
 from cogames.cli.client import TournamentServerClient
 from softmax.auth import (
-    DEFAULT_COGAMES_API_SERVER,
+    DEFAULT_API_SERVER,
     fetch_cogames_whoami,
-    get_login_server,
+    get_api_server,
     load_cogames_user_token,
     restore_cogames_user_session,
     save_cogames_active_token,
@@ -24,7 +24,7 @@ player_app = typer.Typer(
 
 
 def _load_user_token_or_exit(api_server: str | None = None) -> str:
-    user_token = load_cogames_user_token(login_server=get_login_server(api_server=api_server))
+    user_token = load_cogames_user_token(api_server=api_server or get_api_server())
     if user_token is None:
         console.print("[red]No saved user session found.[/red] Run [cyan]cogames auth login[/cyan] first.")
         raise typer.Exit(1)
@@ -52,7 +52,7 @@ def _resolve_player(client: TournamentServerClient, player: str) -> str:
 @player_app.command(name="list")
 def list_players_cmd(
     server: str = typer.Option(
-        DEFAULT_COGAMES_API_SERVER,
+        DEFAULT_API_SERVER,
         "--server",
         "-s",
         metavar="URL",
@@ -87,7 +87,7 @@ def list_players_cmd(
 def login_player_cmd(
     player: str = typer.Argument(..., metavar="PLAYER", help="Player name or ID (ply_...)."),
     server: str = typer.Option(
-        DEFAULT_COGAMES_API_SERVER,
+        DEFAULT_API_SERVER,
         "--server",
         "-s",
         metavar="URL",
@@ -102,7 +102,7 @@ def login_player_cmd(
             player_id = _resolve_player(client, player)
             response = client.login_player(player_id)
 
-    save_cogames_active_token(login_server=get_login_server(api_server=server), token=response.token)
+    save_cogames_active_token(api_server=server, token=response.token)
 
     if json:
         emit_json(response.model_dump(mode="json"))
@@ -126,7 +126,7 @@ def logout_player_cmd(
     ),
 ) -> None:
     """Restore the saved user session as the active CoGames session."""
-    user_token = restore_cogames_user_session(login_server=get_login_server(api_server=server))
+    user_token = restore_cogames_user_session(api_server=server or get_api_server())
     if user_token is None:
         console.print("[red]No saved user session found.[/red] Run [cyan]cogames auth login[/cyan] first.")
         raise typer.Exit(1)
@@ -144,7 +144,7 @@ def logout_player_cmd(
 def create_player_cmd(
     name: str = typer.Option(..., "--name", "-n", help="Name for the new player."),
     server: str = typer.Option(
-        DEFAULT_COGAMES_API_SERVER,
+        DEFAULT_API_SERVER,
         "--server",
         "-s",
         metavar="URL",
@@ -181,7 +181,7 @@ player_app.add_typer(credentials_app, name="credentials")
 def list_credentials_cmd(
     player: str = typer.Argument(..., metavar="PLAYER", help="Player name or ID (ply_...)."),
     server: str = typer.Option(
-        DEFAULT_COGAMES_API_SERVER,
+        DEFAULT_API_SERVER,
         "--server",
         "-s",
         metavar="URL",
@@ -227,7 +227,7 @@ def create_credential_cmd(
     name: str = typer.Option(..., "--name", "-n", help="Name for the credential."),
     scope: list[str] = typer.Option([], "--scope", help="Credential scope (can be repeated). Valid: write"),
     server: str = typer.Option(
-        DEFAULT_COGAMES_API_SERVER,
+        DEFAULT_API_SERVER,
         "--server",
         "-s",
         metavar="URL",
@@ -257,7 +257,7 @@ def revoke_credential_cmd(
     player: str = typer.Argument(..., metavar="PLAYER", help="Player name or ID (ply_...)."),
     credential_id: str = typer.Argument(..., metavar="CREDENTIAL_ID", help="Credential UUID to revoke."),
     server: str = typer.Option(
-        DEFAULT_COGAMES_API_SERVER,
+        DEFAULT_API_SERVER,
         "--server",
         "-s",
         metavar="URL",

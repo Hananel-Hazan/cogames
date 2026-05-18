@@ -51,7 +51,7 @@ runner = CliRunner()
 @pytest.fixture(autouse=True)
 def _disable_display_for_cli_tests(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("cogames.main.has_display", lambda: False)
-    monkeypatch.setenv("COGAMES_LOGIN_URL", "http://fake-login-server")
+    monkeypatch.setenv("COGAMES_API_URL", "http://fake-login-server")
 
 
 def _season_summary(
@@ -154,19 +154,19 @@ def _player_login_response_payload() -> dict[str, Any]:
 
 def _setup_read_endpoints(httpserver: HTTPServer) -> None:
     httpserver.expect_request(
-        "/tournament/seasons",
+        "/observatory/tournament/seasons",
         method="GET",
     ).respond_with_json([_season_summary()])
     httpserver.expect_request(
-        "/tournament/seasons/test-season",
+        "/observatory/tournament/seasons/test-season",
         method="GET",
     ).respond_with_json(_season_info())
     httpserver.expect_request(
-        "/tournament/seasons/test-season/leaderboard",
+        "/observatory/tournament/seasons/test-season/leaderboard",
         method="GET",
     ).respond_with_json(_leaderboard_entries())
     httpserver.expect_request(
-        "/tournament/seasons/test-season/versions",
+        "/observatory/tournament/seasons/test-season/versions",
         method="GET",
     ).respond_with_json(
         [
@@ -405,11 +405,11 @@ class TestJsonOutputStability:
     def test_matches_json_output(self, httpserver: HTTPServer) -> None:
         _setup_read_endpoints(httpserver)
         httpserver.expect_request(
-            "/stats/policy-versions",
+            "/observatory/stats/policy-versions",
             method="GET",
         ).respond_with_json({"entries": [_policy_version_info()], "total_count": 1})
         httpserver.expect_request(
-            "/tournament/seasons/test-season/matches",
+            "/observatory/tournament/seasons/test-season/matches",
             method="GET",
         ).respond_with_json([_match_response()])
 
@@ -430,11 +430,11 @@ class TestJsonOutputStability:
     def test_matches_json_player_fields(self, httpserver: HTTPServer) -> None:
         _setup_read_endpoints(httpserver)
         httpserver.expect_request(
-            "/stats/policy-versions",
+            "/observatory/stats/policy-versions",
             method="GET",
         ).respond_with_json({"entries": [_policy_version_info()], "total_count": 1})
         httpserver.expect_request(
-            "/tournament/seasons/test-season/matches",
+            "/observatory/tournament/seasons/test-season/matches",
             method="GET",
         ).respond_with_json([_match_response()])
 
@@ -457,11 +457,11 @@ class TestJsonOutputStability:
     def test_matches_json_has_created_at(self, httpserver: HTTPServer) -> None:
         _setup_read_endpoints(httpserver)
         httpserver.expect_request(
-            "/stats/policy-versions",
+            "/observatory/stats/policy-versions",
             method="GET",
         ).respond_with_json({"entries": [_policy_version_info()], "total_count": 1})
         httpserver.expect_request(
-            "/tournament/seasons/test-season/matches",
+            "/observatory/tournament/seasons/test-season/matches",
             method="GET",
         ).respond_with_json([_match_response()])
 
@@ -481,7 +481,7 @@ class TestJsonOutputStability:
     def test_match_detail_json_output(self, httpserver: HTTPServer) -> None:
         _setup_read_endpoints(httpserver)
         httpserver.expect_request(
-            f"/tournament/matches/{_MATCH_ID}",
+            f"/observatory/tournament/matches/{_MATCH_ID}",
             method="GET",
         ).respond_with_json(_match_response())
 
@@ -496,7 +496,7 @@ class TestJsonOutputStability:
     def test_failed_match_detail_shows_runner_error_hint(self, httpserver: HTTPServer) -> None:
         _setup_read_endpoints(httpserver)
         httpserver.expect_request(
-            f"/tournament/matches/{_MATCH_ID}",
+            f"/observatory/tournament/matches/{_MATCH_ID}",
             method="GET",
         ).respond_with_json(
             _match_response()
@@ -518,11 +518,11 @@ class TestJsonOutputStability:
     def test_submissions_json_output(self, httpserver: HTTPServer) -> None:
         _setup_read_endpoints(httpserver)
         httpserver.expect_request(
-            "/stats/policy-versions",
+            "/observatory/stats/policy-versions",
             method="GET",
         ).respond_with_json({"entries": [_policy_version_info()], "total_count": 1})
         httpserver.expect_request(
-            "/tournament/my-memberships",
+            "/observatory/tournament/my-memberships",
             method="GET",
         ).respond_with_json({_POLICY_VERSION_ID: ["test-season"]})
 
@@ -540,7 +540,7 @@ class TestJsonOutputStability:
     def test_submissions_season_json_output(self, httpserver: HTTPServer) -> None:
         _setup_read_endpoints(httpserver)
         httpserver.expect_request(
-            "/tournament/seasons/test-season/policies",
+            "/observatory/tournament/seasons/test-season/policies",
             method="GET",
         ).respond_with_json(
             [
@@ -609,7 +609,7 @@ class TestAuthBehavior:
         _setup_read_endpoints(httpserver)
         _invoke_with_server(httpserver, "season", "show", "test-season", "--json")
         for req, _ in httpserver.log:
-            if req.path == "/tournament/seasons/test-season":
+            if req.path == "/observatory/tournament/seasons/test-season":
                 assert "X-Auth-Token" not in req.headers
                 break
 
@@ -681,7 +681,7 @@ class TestAuthBehavior:
         _setup_read_endpoints(httpserver)
         _invoke_with_server(httpserver, "season", "list", "--json")
         for req, _ in httpserver.log:
-            if req.path == "/tournament/seasons":
+            if req.path == "/observatory/tournament/seasons":
                 assert "X-Auth-Token" not in req.headers
                 break
 
@@ -689,7 +689,7 @@ class TestAuthBehavior:
         _setup_read_endpoints(httpserver)
         _invoke_with_server(httpserver, "leaderboard", "--season", "test-season", "--json")
         for req, _ in httpserver.log:
-            if req.path == "/tournament/seasons/test-season/leaderboard":
+            if req.path == "/observatory/tournament/seasons/test-season/leaderboard":
                 assert "X-Auth-Token" not in req.headers
                 break
 
@@ -707,11 +707,11 @@ class TestAuthBehavior:
     def test_matches_sends_auth_header_when_authenticated(self, httpserver: HTTPServer) -> None:
         _setup_read_endpoints(httpserver)
         httpserver.expect_request(
-            "/stats/policy-versions",
+            "/observatory/stats/policy-versions",
             method="GET",
         ).respond_with_json({"entries": [_policy_version_info()], "total_count": 1})
         httpserver.expect_request(
-            "/tournament/seasons/test-season/matches",
+            "/observatory/tournament/seasons/test-season/matches",
             method="GET",
         ).respond_with_json([_match_response()])
 
@@ -727,7 +727,7 @@ class TestAuthBehavior:
             )
 
         for req, _ in httpserver.log:
-            if req.path == "/stats/policy-versions":
+            if req.path == "/observatory/stats/policy-versions":
                 assert req.headers.get("X-Auth-Token") == "fake-token"
                 break
 
@@ -745,10 +745,10 @@ class TestPlayerSessions:
         tmp_path: Path,
     ) -> None:
         monkeypatch.setenv("HOME", str(tmp_path))
-        login_server = "http://fake-login-server"
-        _save_user_token(tmp_path, "user-token", login_server)
-        _save_token(tmp_path, "player-token", login_server)
-        httpserver.expect_request("/players", method="GET").respond_with_json([_player_response_payload()])
+        server_url = httpserver.url_for("").rstrip("/")
+        _save_user_token(tmp_path, "user-token", server_url)
+        _save_token(tmp_path, "player-token", server_url)
+        httpserver.expect_request("/observatory/players", method="GET").respond_with_json([_player_response_payload()])
 
         result = runner.invoke(
             app,
@@ -764,7 +764,7 @@ class TestPlayerSessions:
 
         assert result.exit_code == 0
         assert json.loads(result.output)[0]["id"] == "ply_playeralpha"
-        player_reqs = [req for req, _ in httpserver.log if req.path == "/players"]
+        player_reqs = [req for req, _ in httpserver.log if req.path == "/observatory/players"]
         assert player_reqs, "Expected a request to /players"
         assert player_reqs[0].headers.get("X-Auth-Token") == "user-token"
 
@@ -775,9 +775,9 @@ class TestPlayerSessions:
         tmp_path: Path,
     ) -> None:
         monkeypatch.setenv("HOME", str(tmp_path))
-        login_server = "http://fake-login-server"
-        _save_user_token(tmp_path, "user-token", login_server)
-        httpserver.expect_request("/players/ply_playeralpha/login", method="POST").respond_with_json(
+        server_url = httpserver.url_for("").rstrip("/")
+        _save_user_token(tmp_path, "user-token", server_url)
+        httpserver.expect_request("/observatory/players/ply_playeralpha/login", method="POST").respond_with_json(
             _player_login_response_payload()
         )
 
@@ -796,9 +796,9 @@ class TestPlayerSessions:
 
         assert result.exit_code == 0
         assert json.loads(result.output)["token"] == "ply_secret-token"
-        assert load_token(token_kind=TokenKind.COGAMES, server=login_server) == "ply_secret-token"
-        assert load_token(token_kind=TokenKind.COGAMES_USER, server=login_server) == "user-token"
-        login_reqs = [req for req, _ in httpserver.log if req.path == "/players/ply_playeralpha/login"]
+        assert load_token(token_kind=TokenKind.COGAMES, server=server_url) == "ply_secret-token"
+        assert load_token(token_kind=TokenKind.COGAMES_USER, server=server_url) == "user-token"
+        login_reqs = [req for req, _ in httpserver.log if req.path == "/observatory/players/ply_playeralpha/login"]
         assert login_reqs, "Expected a request to /players/ply_playeralpha/login"
         assert login_reqs[0].headers.get("X-Auth-Token") == "user-token"
 
@@ -810,10 +810,10 @@ class TestPlayerSessions:
     ) -> None:
         monkeypatch.setenv("HOME", str(tmp_path))
         login_server = httpserver.url_for("").rstrip("/")
-        monkeypatch.setenv("COGAMES_LOGIN_URL", login_server)
+        monkeypatch.setenv("COGAMES_API_URL", login_server)
         _save_user_token(tmp_path, "user-token", login_server)
         _save_token(tmp_path, "player-token", login_server)
-        httpserver.expect_request("/whoami", method="GET").respond_with_json(
+        httpserver.expect_request("/observatory/whoami", method="GET").respond_with_json(
             {
                 "user_email": "regular@example.com",
                 "is_softmax_team_member": False,
@@ -830,7 +830,7 @@ class TestPlayerSessions:
         assert result.exit_code == 0
         assert load_token(token_kind=TokenKind.COGAMES, server=login_server) == "user-token"
         assert "Restored user session." in result.output
-        whoami_reqs = [req for req, _ in httpserver.log if req.path == "/whoami"]
+        whoami_reqs = [req for req, _ in httpserver.log if req.path == "/observatory/whoami"]
         assert whoami_reqs, "Expected a request to /whoami"
         assert whoami_reqs[0].headers.get("Authorization") == "Bearer user-token"
 
@@ -935,7 +935,7 @@ class TestSeasonLookupAuth:
         tmp_path: Path,
     ) -> None:
         monkeypatch.setenv("HOME", str(tmp_path))
-        _save_token(tmp_path, "service-token-xyz", "http://fake-login-server")
+        _save_token(tmp_path, "service-token-xyz", httpserver.url_for("").rstrip("/"))
         _setup_read_endpoints(httpserver)
         monkeypatch.setattr("cogames.main.upload_policy", lambda **_: None)
 
@@ -953,7 +953,7 @@ class TestSeasonLookupAuth:
             ],
         )
 
-        season_reqs = [req for req, _ in httpserver.log if req.path == "/tournament/seasons"]
+        season_reqs = [req for req, _ in httpserver.log if req.path == "/observatory/tournament/seasons"]
         assert season_reqs, "Expected a request to /tournament/seasons"
         assert season_reqs[0].headers.get("X-Auth-Token") == "service-token-xyz"
 
@@ -964,13 +964,13 @@ class TestSeasonLookupAuth:
         tmp_path: Path,
     ) -> None:
         monkeypatch.setenv("HOME", str(tmp_path))
-        _save_token(tmp_path, "service-token-xyz", "http://fake-login-server")
+        _save_token(tmp_path, "service-token-xyz", httpserver.url_for("").rstrip("/"))
         _setup_read_endpoints(httpserver)
 
         result = _invoke_with_server(httpserver, "season", "list", "--json")
 
         assert result.exit_code == 0
-        season_reqs = [req for req, _ in httpserver.log if req.path == "/tournament/seasons"]
+        season_reqs = [req for req, _ in httpserver.log if req.path == "/observatory/tournament/seasons"]
         assert season_reqs, "Expected a request to /tournament/seasons"
         assert season_reqs[0].headers.get("X-Auth-Token") == "service-token-xyz"
 
@@ -981,13 +981,13 @@ class TestSeasonLookupAuth:
         tmp_path: Path,
     ) -> None:
         monkeypatch.setenv("HOME", str(tmp_path))
-        _save_token(tmp_path, "service-token-xyz", "http://fake-login-server")
+        _save_token(tmp_path, "service-token-xyz", httpserver.url_for("").rstrip("/"))
         _setup_read_endpoints(httpserver)
 
         result = _invoke_with_server(httpserver, "season", "show", "test-season", "--json")
 
         assert result.exit_code == 0
-        season_reqs = [req for req, _ in httpserver.log if req.path == "/tournament/seasons/test-season"]
+        season_reqs = [req for req, _ in httpserver.log if req.path == "/observatory/tournament/seasons/test-season"]
         assert season_reqs, "Expected a request to /tournament/seasons/test-season"
         assert season_reqs[0].headers.get("X-Auth-Token") == "service-token-xyz"
 
@@ -1016,7 +1016,7 @@ class TestSeasonLookupAuth:
             ],
         )
 
-        season_reqs = [req for req, _ in httpserver.log if req.path == "/tournament/seasons"]
+        season_reqs = [req for req, _ in httpserver.log if req.path == "/observatory/tournament/seasons"]
         assert season_reqs, "Expected a request to /tournament/seasons"
         assert "X-Auth-Token" not in season_reqs[0].headers
 
@@ -1027,12 +1027,12 @@ class TestSeasonLookupAuth:
         tmp_path: Path,
     ) -> None:
         monkeypatch.setenv("HOME", str(tmp_path))
-        _save_token(tmp_path, "service-token-xyz", "http://fake-login-server")
+        _save_token(tmp_path, "service-token-xyz", httpserver.url_for("").rstrip("/"))
         _setup_read_endpoints(httpserver)
 
         policy_version_id = str(uuid.uuid4())
         policy_id = str(uuid.uuid4())
-        httpserver.expect_request("/stats/policy-versions", method="GET").respond_with_json(
+        httpserver.expect_request("/observatory/stats/policy-versions", method="GET").respond_with_json(
             {
                 "entries": [
                     {
@@ -1048,9 +1048,9 @@ class TestSeasonLookupAuth:
                 "total_count": 1,
             }
         )
-        httpserver.expect_request("/tournament/seasons/test-season/submissions", method="POST").respond_with_json(
-            {"pools": ["ranked"]}
-        )
+        httpserver.expect_request(
+            "/observatory/tournament/seasons/test-season/submissions", method="POST"
+        ).respond_with_json({"pools": ["ranked"]})
 
         with _mock_from_login(httpserver):
             result = runner.invoke(
@@ -1066,7 +1066,7 @@ class TestSeasonLookupAuth:
             )
 
         assert result.exit_code == 0
-        season_reqs = [req for req, _ in httpserver.log if req.path == "/tournament/seasons/test-season"]
+        season_reqs = [req for req, _ in httpserver.log if req.path == "/observatory/tournament/seasons/test-season"]
         assert season_reqs, "Expected a request to /tournament/seasons/test-season"
         assert season_reqs[0].headers.get("X-Auth-Token") == "service-token-xyz"
 
@@ -1092,7 +1092,7 @@ class TestSeasonLookupAuth:
             ],
         )
 
-        season_reqs = [req for req, _ in httpserver.log if req.path == "/tournament/seasons/test-season"]
+        season_reqs = [req for req, _ in httpserver.log if req.path == "/observatory/tournament/seasons/test-season"]
         assert season_reqs, "Expected a request to /tournament/seasons/test-season"
         assert "X-Auth-Token" not in season_reqs[0].headers
 
@@ -1140,5 +1140,5 @@ class TestSubmitBrowserLaunch:
         expected_base_url: str,
         monkeypatch: pytest.MonkeyPatch,
     ) -> None:
-        monkeypatch.setenv("COGAMES_LOGIN_URL", login_server_url)
+        monkeypatch.setenv("COGAMES_API_URL", login_server_url)
         assert observatory_home_url() == f"{expected_base_url}/observatory/home"

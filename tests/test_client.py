@@ -306,7 +306,7 @@ def client(httpserver: HTTPServer) -> TournamentServerClient:
 
 class TestGetStages:
     def test_request_and_parse(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/tournament/seasons/s1/stages", method="GET").respond_with_json(
+        httpserver.expect_request("/observatory/tournament/seasons/s1/stages", method="GET").respond_with_json(
             [_stage_stats_payload()]
         )
         stages = client.get_stages("s1")
@@ -317,14 +317,14 @@ class TestGetStages:
 
 class TestPlayers:
     def test_list_players(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/players", method="GET").respond_with_json([_player_response_payload()])
+        httpserver.expect_request("/observatory/players", method="GET").respond_with_json([_player_response_payload()])
         players = client.list_players()
         assert len(players) == 1
         assert isinstance(players[0], PlayerResponse)
         assert players[0].id == "ply_playeralpha"
 
     def test_login_player(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/players/ply_playeralpha/login", method="POST").respond_with_json(
+        httpserver.expect_request("/observatory/players/ply_playeralpha/login", method="POST").respond_with_json(
             _player_login_response_payload()
         )
         login = client.login_player("ply_playeralpha")
@@ -335,7 +335,7 @@ class TestPlayers:
 
 class TestGetProgress:
     def test_request_and_parse(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/tournament/seasons/s1/progress", method="GET").respond_with_json(
+        httpserver.expect_request("/observatory/tournament/seasons/s1/progress", method="GET").respond_with_json(
             _progress_payload()
         )
         progress = client.get_progress("s1")
@@ -345,7 +345,7 @@ class TestGetProgress:
 
 class TestGetTeams:
     def test_request_and_parse(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/tournament/seasons/s1/teams", method="GET").respond_with_json(
+        httpserver.expect_request("/observatory/tournament/seasons/s1/teams", method="GET").respond_with_json(
             [_team_summary_payload()]
         )
         teams = client.get_teams("s1")
@@ -354,7 +354,7 @@ class TestGetTeams:
         assert teams[0].pool_name == "stage-1"
 
     def test_filters(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/tournament/seasons/s1/teams", method="GET").respond_with_json([])
+        httpserver.expect_request("/observatory/tournament/seasons/s1/teams", method="GET").respond_with_json([])
         result = client.get_teams("s1", limit=10, offset=5, pool_name="stage-2", eliminated=True)
         assert result == []
         req, _ = httpserver.log[-1]
@@ -364,7 +364,7 @@ class TestGetTeams:
         assert req.args["eliminated"] == "true"
 
     def test_policy_version_id_filter(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/tournament/seasons/s1/teams", method="GET").respond_with_json([])
+        httpserver.expect_request("/observatory/tournament/seasons/s1/teams", method="GET").respond_with_json([])
         pv_id = uuid.UUID(_PV_ID)
         result = client.get_teams("s1", policy_version_id=pv_id)
         assert result == []
@@ -381,9 +381,9 @@ class TestGetStageLeaderboard:
             "score_stddev": 50.0,
             "matches": 20,
         }
-        httpserver.expect_request("/tournament/seasons/s1/leaderboard/policy/stage-1", method="GET").respond_with_json(
-            [entry]
-        )
+        httpserver.expect_request(
+            "/observatory/tournament/seasons/s1/leaderboard/policy/stage-1", method="GET"
+        ).respond_with_json([entry])
         result = client.get_stage_leaderboard("s1", "policy", "stage-1")
         assert len(result) == 1
         assert isinstance(result[0], LeaderboardEntry)
@@ -393,7 +393,7 @@ class TestGetStageLeaderboard:
 
     def test_score_policies_leaderboard(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
         httpserver.expect_request(
-            "/tournament/seasons/s1/leaderboard/score-policies/stage-1", method="GET"
+            "/observatory/tournament/seasons/s1/leaderboard/score-policies/stage-1", method="GET"
         ).respond_with_json([_score_policies_entry_payload()])
         result = client.get_stage_leaderboard("s1", "score-policies", "stage-1")
         assert len(result) == 1
@@ -401,9 +401,9 @@ class TestGetStageLeaderboard:
         assert result[0].placement_score == 42.5
 
     def test_team_leaderboard(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/tournament/seasons/s1/leaderboard/team/stage-1", method="GET").respond_with_json(
-            [_team_summary_payload()]
-        )
+        httpserver.expect_request(
+            "/observatory/tournament/seasons/s1/leaderboard/team/stage-1", method="GET"
+        ).respond_with_json([_team_summary_payload()])
         result = client.get_stage_leaderboard("s1", "team", "stage-1")
         assert len(result) == 1
         assert isinstance(result[0], TeamSummary)
@@ -413,9 +413,9 @@ class TestGetStageLeaderboard:
 class TestGetPoolConfig:
     def test_request_and_parse_pool_config_info(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
         config = {"game": {"num_agents": 4}, "map": {"width": 32}}
-        httpserver.expect_request("/tournament/seasons/s1/pools/stage-1/config", method="GET").respond_with_json(
-            {"pool_name": "stage-1", "game_engine": "bitworld", "config": config}
-        )
+        httpserver.expect_request(
+            "/observatory/tournament/seasons/s1/pools/stage-1/config", method="GET"
+        ).respond_with_json({"pool_name": "stage-1", "game_engine": "bitworld", "config": config})
         result = client.get_pool_config("s1", "stage-1")
         assert isinstance(result, PoolConfigInfo)
         assert result.pool_name == "stage-1"
@@ -428,7 +428,7 @@ class TestGetMatchArtifacts:
         match_id = uuid.UUID(_MATCH_ID)
         pv_id = uuid.UUID(_PV_ID)
         httpserver.expect_request(
-            f"/tournament/matches/{_MATCH_ID}/{_PV_ID}/artifacts/logs", method="GET"
+            f"/observatory/tournament/matches/{_MATCH_ID}/{_PV_ID}/artifacts/logs", method="GET"
         ).respond_with_data("log line 1\nlog line 2\n", content_type="text/plain")
         result = client.get_match_artifacts(match_id, pv_id, "logs")
         assert "log line 1" in result
@@ -436,14 +436,16 @@ class TestGetMatchArtifacts:
 
 class TestListEpisodes:
     def test_request_and_parse(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/episodes", method="GET").respond_with_json([_episode_response_payload()])
+        httpserver.expect_request("/observatory/episodes", method="GET").respond_with_json(
+            [_episode_response_payload()]
+        )
         episodes = client.list_episodes()
         assert len(episodes) == 1
         assert isinstance(episodes[0], EpisodeResponse)
         assert episodes[0].id == uuid.UUID(_EPISODE_ID)
 
     def test_filters(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/episodes", method="GET").respond_with_json([])
+        httpserver.expect_request("/observatory/episodes", method="GET").respond_with_json([])
         pv_id = uuid.UUID(_PV_ID)
         result = client.list_episodes(policy_version_id=pv_id, limit=10, offset=5, tags="game:cogs")
         assert result == []
@@ -456,7 +458,7 @@ class TestListEpisodes:
 
 class TestGetEpisode:
     def test_request_and_parse(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request(f"/episodes/{_EPISODE_ID}", method="GET").respond_with_json(
+        httpserver.expect_request(f"/observatory/episodes/{_EPISODE_ID}", method="GET").respond_with_json(
             _episode_response_payload()
         )
         ep = client.get_episode(uuid.UUID(_EPISODE_ID))
@@ -466,7 +468,7 @@ class TestGetEpisode:
 
 class TestBrowsePolicies:
     def test_request_and_parse(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/stats/policies", method="GET").respond_with_json(
+        httpserver.expect_request("/observatory/stats/policies", method="GET").respond_with_json(
             {"entries": [_policy_row_payload()], "total_count": 1}
         )
         result = client.browse_policies()
@@ -474,7 +476,9 @@ class TestBrowsePolicies:
         assert result.total_count == 1
 
     def test_filters(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/stats/policies", method="GET").respond_with_json({"entries": [], "total_count": 0})
+        httpserver.expect_request("/observatory/stats/policies", method="GET").respond_with_json(
+            {"entries": [], "total_count": 0}
+        )
         result = client.browse_policies(name_exact="alpha", name_fuzzy="alp", limit=20, offset=10)
         assert result.total_count == 0
         req, _ = httpserver.log[-1]
@@ -505,9 +509,9 @@ def _episode_query_result_payload() -> dict:
 
 class TestGetScorePoliciesLeaderboard:
     def test_request_and_parse(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/tournament/seasons/s1/score-policies-leaderboard", method="GET").respond_with_json(
-            [_score_policies_entry_payload()]
-        )
+        httpserver.expect_request(
+            "/observatory/tournament/seasons/s1/score-policies-leaderboard", method="GET"
+        ).respond_with_json([_score_policies_entry_payload()])
         result = client.get_score_policies_leaderboard("s1")
         assert len(result) == 1
         assert isinstance(result[0], ScorePoliciesLeaderboardEntry)
@@ -523,7 +527,7 @@ class TestGetScorePoliciesLeaderboard:
 
 class TestQueryEpisodes:
     def test_basic_request(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/stats/episodes/query", method="POST").respond_with_json(
+        httpserver.expect_request("/observatory/stats/episodes/query", method="POST").respond_with_json(
             {"episodes": [_episode_query_result_payload()]}
         )
         result = client.query_episodes()
@@ -531,7 +535,9 @@ class TestQueryEpisodes:
         assert len(result.episodes) == 1
 
     def test_with_policy_version_ids(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/stats/episodes/query", method="POST").respond_with_json({"episodes": []})
+        httpserver.expect_request("/observatory/stats/episodes/query", method="POST").respond_with_json(
+            {"episodes": []}
+        )
         pv_id = uuid.UUID(_PV_ID)
         result = client.query_episodes(primary_policy_version_ids=[pv_id])
         assert result.episodes == []
@@ -540,7 +546,9 @@ class TestQueryEpisodes:
         assert body["primary_policy_version_ids"] == [_PV_ID]
 
     def test_with_all_filters(self, httpserver: HTTPServer, client: TournamentServerClient) -> None:
-        httpserver.expect_request("/stats/episodes/query", method="POST").respond_with_json({"episodes": []})
+        httpserver.expect_request("/observatory/stats/episodes/query", method="POST").respond_with_json(
+            {"episodes": []}
+        )
         pv_id = uuid.UUID(_PV_ID)
         ep_id = uuid.UUID(_EPISODE_ID)
         result = client.query_episodes(

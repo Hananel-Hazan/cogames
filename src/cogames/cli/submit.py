@@ -26,9 +26,9 @@ from mettagrid.policy.prepare_policy_spec import extract_submission_archive, fin
 from mettagrid.policy.submission import POLICY_SPEC_FILENAME, SubmissionPolicySpec, write_submission_policy_spec
 from mettagrid.runner.types import PureSingleEpisodeResult
 from mettagrid.util.uri_resolvers.schemes import localize_uri, parse_uri
-from softmax.auth import get_login_server
+from softmax.auth import get_api_server
 
-DEFAULT_SUBMIT_SERVER = "https://api.observatory.softmax-research.net"
+DEFAULT_SUBMIT_SERVER = "https://softmax.com/api"
 DEFAULT_EPISODE_RUNNER_IMAGE = "ghcr.io/metta-ai/episode-runner:latest"
 RESULTS_URL = "https://www.softmax.com/alignmentleague"
 _METTA_POLICY_CLASS_PREFIX = "metta.agent."
@@ -43,7 +43,7 @@ class UploadResult:
 
 
 def observatory_home_url() -> str:
-    parsed = urlsplit(get_login_server())
+    parsed = urlsplit(get_api_server())
     hostname = (parsed.hostname or "").removeprefix("api.")
     if parsed.port is None:
         netloc = hostname
