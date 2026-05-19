@@ -71,7 +71,7 @@ Breaking changes to command-line arguments for improved consistency:
 - `cogames diagnose` - removed `-m` short form for `--experiments`
 - `cogames diagnose` - replaced `--repeats` with `--episodes/-e`
 - `cogames make-mission` - removed `-h` and `-w` short form for `--height` and `--width`
-- `cogames login` - replaced `--server/-s` with `--login-server`
+- `cogames login` - uses `--server/-s` for the unified API server
 - `cogames pickup` - added `--mission/-m` and `--variant/-v` flags (previously hardcoded to `machina_1.open_world`)
 - `cogames validate-policy` - replaced `policy` positional argument with `--policy/-p` flag
 

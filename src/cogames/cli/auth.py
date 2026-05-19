@@ -39,7 +39,7 @@ def login_cmd(
         "--server",
         "-s",
         metavar="URL",
-        help="Authentication server URL.",
+        help="API server URL.",
     ),
 ) -> None:
     """Log in to CoGames."""
@@ -53,7 +53,7 @@ def logout_cmd(
         "--server",
         "-s",
         metavar="URL",
-        help="Authentication server URL.",
+        help="API server URL.",
     ),
 ) -> None:
     """Log out of CoGames."""
@@ -67,7 +67,7 @@ def get_login_url_cmd(
         "--server",
         "-s",
         metavar="URL",
-        help="Authentication server URL.",
+        help="API server URL.",
     ),
 ) -> None:
     """Print the CoGames login URL."""
@@ -81,7 +81,7 @@ def status_cmd(
         "--server",
         "-s",
         metavar="URL",
-        help="Authentication server URL.",
+        help="API server URL.",
     ),
 ) -> None:
     """Show CoGames authentication status."""
@@ -95,7 +95,7 @@ def get_token_cmd(
         "--server",
         "-s",
         metavar="URL",
-        help="Authentication server URL.",
+        help="API server URL.",
     ),
 ) -> None:
     """Print the saved CoGames token."""
@@ -110,7 +110,7 @@ def set_token_cmd(
         "--server",
         "-s",
         metavar="URL",
-        help="Authentication server URL.",
+        help="API server URL.",
     ),
 ) -> None:
     """Save a CoGames token."""
