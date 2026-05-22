@@ -9,6 +9,7 @@ class GitSource(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     git: str
+    subdirectory: str | None = None
     rev: str | None = None
 
 
@@ -46,7 +47,8 @@ STANDALONE_GAMES: dict[str, StandaloneGameInstall] = {
         module_name="tribal_village_env.recipe",
         package_name="tribalcog",
         source=GitSource(
-            git="https://github.com/Metta-AI/cogame-tribal.git",
+            git="https://github.com/Metta-AI/games.git",
+            subdirectory="games/tribalcog",
         ),
     ),
     "amongcogs": StandaloneGameInstall(
