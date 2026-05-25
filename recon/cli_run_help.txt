@@ -1,0 +1,55 @@
+                                                                                
+ Usage: cogames run [OPTIONS]                                                   
+                                                                                
+ Evaluate one or more policies on missions.                                     
+                                                                                
+ With multiple policies (e.g., 2 policies, 4 agents), each policy always        
+ controls 2 agents,                                                             
+ but which agents swap between policies each episode.                           
+                                                                                
+ With one policy, this command is equivalent to `cogames scrimmage`.            
+                                                                                
+╭─ Mission ────────────────────────────────────────────────────────────────────╮
+│ --mission  -m      MISSION  Missions to evaluate (supports wildcards).       │
+│ --cogs     -c      N        Number of cogs (agents).                         │
+│ --variant  -v      VARIANT  Mission variant (repeatable).                    │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Policy ─────────────────────────────────────────────────────────────────────╮
+│ --policy  -p      POLICY  Policies to evaluate: (URI[,proportion=N] or NAME  │
+│                           or class=NAME[,data=FILE][,proportion=N]...).      │
+│ --device          DEVICE  Policy device (auto, cpu, cuda, cuda:0, etc.).     │
+│                           [default: auto]                                    │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Simulation ─────────────────────────────────────────────────────────────────╮
+│ --episodes           -e      N [x>=1]   Number of evaluation episodes.       │
+│                                         [default: 10]                        │
+│ --steps              -s      N [x>=1]   Max steps per episode (note: -s is   │
+│                                         steps, not seed).                    │
+│                                         [default: (from mission)]            │
+│ --seed                       N [x>=0]   Seed for evaluation RNG (use --seed, │
+│                                         not -s).                             │
+│                                         [default: 42]                        │
+│ --map-seed                   N [x>=0]   MapGen seed for procedural maps.     │
+│                                         [default: (same as --seed)]          │
+│ --action-timeout-ms          MS [x>=1]  Max ms per action before noop.       │
+│                                         [default: 250]                       │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Output ─────────────────────────────────────────────────────────────────────╮
+│ --format                 FMT  Output format: yaml or json.                   │
+│ --save-replay-dir        DIR  Directory to save replays.                     │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Other ──────────────────────────────────────────────────────────────────────╮
+│ --help  -h        Show this message and exit.                                │
+╰──────────────────────────────────────────────────────────────────────────────╯
+                                                                                
+ Examples:                                                                      
+ cogames run -m arena -p lstm                         Evaluate single policy    
+ cogames run -m machina_1 -p ./train_dir/my_run:v5     Evaluate a checkpoint    
+ bundle                                                                         
+ cogames run -m 'arena.*' -p lstm -p random -e 20            Evaluate multiple  
+ policies together                                                              
+ cogames run -m machina_1 -p ./train_dir/my_run:v5,proportion=3 -p              
+ class=random,proportion=5                                                      
+ Evaluate policies in 3:5 mix                                                   
+                                                                                
+

@@ -1,0 +1,15 @@
+bitworld_random_action      mettagrid.policy.bitworld.BitWorldRandomActionPolicy
+bitworld_random_dpad          mettagrid.policy.bitworld.BitWorldRandomDpadPolicy
+noop                                            mettagrid.policy.noop.NoopPolicy
+random                      mettagrid.policy.random_agent.RandomMultiAgentPolicy
+chaos-monkey                       cogames.policy.chaos_monkey.ChaosMonkeyPolicy
+substrate_memory        cogames.policy.cognitive_substrate_diagnostics.Substrat…
+substrate_exploration   cogames.policy.cognitive_substrate_diagnostics.Substrat…
+substrate_planning      cogames.policy.cognitive_substrate_diagnostics.Substrat…
+starter                               cogames.policy.starter_agent.StarterPolicy
+miner                               cogames.policy.role_policies.MinerRolePolicy
+scout                               cogames.policy.role_policies.ScoutRolePolicy
+aligner                           cogames.policy.role_policies.AlignerRolePolicy
+scrambler                       cogames.policy.role_policies.ScramblerRolePolicy
+tutorial_noop           cogames.policy.tutorial_overlay_policy.TutorialOverlayP…
+custom                                                  path.to.your.PolicyClass

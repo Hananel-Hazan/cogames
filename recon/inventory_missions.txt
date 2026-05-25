@@ -1,0 +1,6 @@
+Usage: cogames [OPTIONS] COMMAND [ARGS]...
+Try 'cogames -h' for help.
+╭─ Error ──────────────────────────────────────────────────────────────────────╮
+│ No such command 'missions'. Did you mean 'submissions'? Did you mean         │
+│ 'submissions'?                                                               │
+╰──────────────────────────────────────────────────────────────────────────────╯

@@ -1,0 +1,53 @@
+                                                                                
+ Usage: cogames [OPTIONS] COMMAND [ARGS]...                                     
+                                                                                
+ CoGames - Multi-agent cooperative and competitive games.                       
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --install-completion            Install completion for the current shell.    │
+│ --show-completion               Show completion for the current shell, to    │
+│                                 copy it or customize the installation.       │
+│ --help                -h        Show this message and exit.                  │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Play ───────────────────────────────────────────────────────────────────────╮
+│ play             Play a game interactively.                                  │
+│ replay           Replay a saved game episode from a file in the GUI.         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Evaluate ───────────────────────────────────────────────────────────────────╮
+│ scrimmage        Evaluate a single policy controlling all agents.            │
+│ run              Evaluate one or more policies on missions.                  │
+│ pickup           Evaluate a policy against a pool of other policies and      │
+│                  compute VOR.                                                │
+│ diagnose         Run diagnostic evals for a policy checkpoint.               │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Info ───────────────────────────────────────────────────────────────────────╮
+│ version          Show version information for cogames and dependencies.      │
+│ docs             Print documentation (run without arguments to see available │
+│                  docs).                                                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Policies ───────────────────────────────────────────────────────────────────╮
+│ policies         Show available policy shorthand names.                      │
+│ create-bundle    Create a submission bundle zip from a policy.               │
+│ validate-bundle  Validate a policy bundle runs correctly in Docker.          │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Tournament ─────────────────────────────────────────────────────────────────╮
+│ submissions      Show your uploads and tournament submissions.               │
+│ leaderboard      Show tournament leaderboard for a season.                   │
+│ matches          Show your recent matches and policy logs.                   │
+│ match-artifacts  Retrieve artifacts for a match (logs, etc.).                │
+│ upload           Upload a policy to CoGames.                                 │
+│ submit           Submit a policy to a tournament season.                     │
+│ ship             Bundle, validate, upload, and submit a policy in one        │
+│                  command.                                                    │
+│ auth             CoGames authentication commands                             │
+│ season           Tournament season commands.                                 │
+│ episode          Browse and replay game episodes.                            │
+│ assay            Assay run commands.                                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Tutorials ──────────────────────────────────────────────────────────────────╮
+│ tutorial         Tutorial commands to help you get started with CoGames.     │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ BitWorld ───────────────────────────────────────────────────────────────────╮
+│ bitworld         Run optional BitWorld websocket games.                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
