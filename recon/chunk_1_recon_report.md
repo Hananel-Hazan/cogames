@@ -13,14 +13,14 @@ Captured by inspecting the installed environment and the editable `cogames` chec
 | Field | Value | Source |
 |---|---|---|
 | `cogames` version | `0.0.0` (editable install) | `pip show cogames` |
-| `cogames` repo path | `/mnt/exDisk0/git_repo/cogames` | [PROJECT_PLAN.md §4](../../PROJECT_PLAN.md) |
+| `cogames` repo path | `/mnt/exDisk0/git_repo/cogames` | [PROJECT_PLAN.md §4](../../research/reference/ENVIRONMENT.md) |
 | `cogsguard` version | `0.0.0.post1.dev12` | `pip show cogsguard` |
 | `cogsguard` repo HEAD | `bc8ac3d` (in `/mnt/exDisk0/git_repo/cogames`) | `git rev-parse --short HEAD` |
 | `mettagrid` version | `0.26.21` | `pip show mettagrid` |
 | `torch` version | `2.9.0+cu128` (CUDA 12.8) | `python -c "import torch; print(torch.__version__)"` |
 | Python | 3.12 | conda env path `…/envs/cogames/lib/python3.12/…` |
-| Conda env name | `cogames` | [PROJECT_PLAN.md §4](../../PROJECT_PLAN.md) |
-| Hardware | RTX 2070 8 GB VRAM, 32 cores, 120 GB RAM | [PROJECT_PLAN.md §4](../../PROJECT_PLAN.md) |
+| Conda env name | `cogames` | [PROJECT_PLAN.md §4](../../research/reference/ENVIRONMENT.md) |
+| Hardware | RTX 2070 8 GB VRAM, 32 cores, 120 GB RAM | [PROJECT_PLAN.md §4](../../research/reference/ENVIRONMENT.md) |
 
 ## 6.2 Mission Inventory
 
@@ -336,7 +336,7 @@ The starter's per-agent policies are `StatefulAgentPolicy[StarterCogState]` and 
 | arena | 4 | 100 | 20 | 42 | random  | 0.000 (all 20 episodes) | 0.000 |
 | arena | 4 | 100 | 20 | 42 | starter | 7.234 ± 1.156 | 1.808 ± 0.289 |
 
-**Caveat.** Episode length was **100 steps**, not the locked-for-data-collection 1500 (per [PROJECT_PLAN.md §6 Decision B](../../PROJECT_PLAN.md)). At 100 steps, random has insufficient horizon to reach a junction, so the 0.000 score reflects horizon-limited exploration, not a broken policy. Starter scores will scale (non-linearly) with the 15× longer 1500-step rollouts used in Chunk 2.
+**Caveat.** Episode length was **100 steps**, not the locked-for-data-collection 1500 (per [PROJECT_PLAN.md §6 Decision B](../../research/reference/ENVIRONMENT.md)). At 100 steps, random has insufficient horizon to reach a junction, so the 0.000 score reflects horizon-limited exploration, not a broken policy. Starter scores will scale (non-linearly) with the 15× longer 1500-step rollouts used in Chunk 2.
 
 ## 6.6 Introspection Script Output
 
@@ -426,7 +426,7 @@ In `recon/` after this consolidation task:
 
 ## Corrections to Initial Assumptions
 
-Two corrections to the Chunk 1 v5 work order's framing were discovered during execution and verified end-to-end. Both are already mirrored in [PROJECT_PLAN.md §5](../../PROJECT_PLAN.md); reproduced here for the standalone record.
+Two corrections to the Chunk 1 v5 work order's framing were discovered during execution and verified end-to-end. Both are already mirrored in [PROJECT_PLAN.md §5](../../research/reference/ENVIRONMENT.md); reproduced here for the standalone record.
 
 1. **5-tuple step return, not 4-tuple.** `env.step(actions)` returns `(obs, rewards, terminals, truncations, info)` (Gymnasium style). The work order quoted a 4-tuple `(obs, reward, done, info)`. Per-cog arrays for `rewards` (float32), `terminals` (bool), `truncations` (bool), each of shape `(num_agents,)`. Source: `mettagrid/envs/mettagrid_puffer_env.py:296`. Implication for Chunk 2: data collector must persist `terminals` and `truncations` separately for RTG handling under truncation.
 
